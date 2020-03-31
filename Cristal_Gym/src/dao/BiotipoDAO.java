@@ -3,6 +3,7 @@ package dao;
 import dao.config.Conexao;
 import entidades.Biotipo;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -26,7 +27,7 @@ public class BiotipoDAO {
         }
     }
 
-    private List<Biotipo> construirBiotipo(ResultSet resultSet) throws SQLException {
+    private List<Biotipo> selectBiotipo(ResultSet resultSet) throws SQLException {
         List<Biotipo> biotipos = new ArrayList<>();
 
         while (resultSet.next()){
@@ -48,12 +49,23 @@ public class BiotipoDAO {
             String query = "Select * from biotipo";
             Statement estado = this.iniciarConexao();
             ResultSet resultSet =  estado.executeQuery(query);
-            return this.construirBiotipo(resultSet);
+            return this.selectBiotipo(resultSet);
         } catch (SQLException ex) {
             System.out.println("Problema enquanto convertia biotipo");
             throw new RuntimeException(ex.getMessage());
-        }finally {
+        }
+    }
+
+    public void novoBiotipo(Biotipo biotipo) {
+        try {
+            PreparedStatement query = conexao.abrir().prepareStatement(
+                    "INSERT into biotipo " +
+            "values (default ," + biotipo.getAltura() + "," + biotipo.getPeso() + ", CURRENT_TIMESTAMP(), " + biotipo.getIdCliente() + ")");
+            query.executeUpdate();
             conexao.fechar();
+        }catch (SQLException e) {
+            System.out.println("Dev tivemos problemas em conexão ao MySql");
+            e.printStackTrace();
         }
     }
 }

@@ -15,6 +15,32 @@ public class Biotipo {
         this.idCliente = idCliente;
     }
 
+    public Biotipo(){
+
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setAltura(Float altura) {
+        this.altura = altura;
+    }
+
+    public void setPeso(Float peso) {
+        this.peso = peso;
+    }
+
+    public void setIdCliente(Integer idCliente) {
+        this.idCliente = idCliente;
+    }
+
+    public Biotipo(Integer idCliente){
+        this.idCliente = idCliente;
+
+        // pedir cada atributo do biotipo para o usuario
+    }
+
     public Integer getId() {
         return id;
     }

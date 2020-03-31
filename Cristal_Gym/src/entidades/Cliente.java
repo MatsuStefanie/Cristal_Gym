@@ -1,5 +1,6 @@
 package entidades;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -12,17 +13,22 @@ public class Cliente {
     private Integer id;
     private String nome;
     private String cpf;
-    private Date dataNascimento;
+    private LocalDate dataNascimento;
 
     // atributos de relacionamento
 
-    //Msny-To-One
+    //Many-To-One
     private List<Biotipo> biotipos;
 
     //Many-To-One
     private List<Email> emails;
 
-    public Cliente(Integer id, String nome, String cpf, Date dataNascimento) {
+    public Cliente() {
+        super();
+    }
+
+
+    public Cliente(Integer id, String nome, String cpf, LocalDate dataNascimento) {
         this.id = id ;
         this.nome = nome;
         this.cpf = cpf;
@@ -44,7 +50,7 @@ public class Cliente {
         return cpf;
     }
 
-    public Date getDataNascimento() {
+    public LocalDate getDataNascimento() {
         return dataNascimento;
     }
 
@@ -63,5 +69,21 @@ public class Cliente {
 
     public void addBiotipo(Biotipo biotipo) {
         this.biotipos.add(biotipo);
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
+
+    public void setDataNascimento(LocalDate dataNascimento) {
+        this.dataNascimento = dataNascimento;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }

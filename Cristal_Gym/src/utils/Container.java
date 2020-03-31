@@ -10,6 +10,7 @@ import dao.config.Conexao;
 import visualizacoes.BiotipoVisualizador;
 import visualizacoes.ClienteVisualizador;
 import visualizacoes.EmailVisualizador;
+import visualizacoes.TelaCliente;
 import visualizacoes.TelaInicio;
 
 import java.util.ArrayList;
@@ -37,22 +38,30 @@ public final class Container {
         dependencias.add(emailControlador);
         dependencias.add(emailVisualizador);
 
-        ClienteDAO clienteDAO = new ClienteDAO(conexao);
-        ClienteControlador clienteControlador = new ClienteControlador(clienteDAO);
-        ClienteVisualizador clienteVisualizador = new ClienteVisualizador();
-        dependencias.add(clienteDAO);
-        dependencias.add(clienteControlador);
-        dependencias.add(clienteVisualizador);
+
+
 
         BiotipoDAO biotipoDAO = new BiotipoDAO(conexao);
         BiotipoControlador biotipoControlador = new BiotipoControlador(biotipoDAO);
         BiotipoVisualizador biotipoVisualizador = new BiotipoVisualizador();
+
+
+        ClienteDAO clienteDAO = new ClienteDAO(conexao, emailDAO);
+        ClienteControlador clienteControlador = new ClienteControlador(clienteDAO);
+        ClienteVisualizador clienteVisualizador = new ClienteVisualizador();
+        TelaCliente telaCliente = new TelaCliente(clienteControlador,emailControlador,biotipoControlador);
+
+
+
+        TelaInicio telaInicio = new TelaInicio(telaCliente);
+
+        dependencias.add(telaInicio);
+        dependencias.add(clienteDAO);
+        dependencias.add(clienteVisualizador);
+        dependencias.add(telaCliente);
         dependencias.add(biotipoDAO);
         dependencias.add(biotipoControlador);
         dependencias.add(biotipoVisualizador);
-
-        TelaInicio telaInicio = new TelaInicio();
-        dependencias.add(telaInicio);
     }
 
     public static <T> T buscarDependencia(Class<T> classDependencia) {

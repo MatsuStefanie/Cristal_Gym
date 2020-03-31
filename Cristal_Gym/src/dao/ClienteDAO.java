@@ -4,26 +4,27 @@ import dao.config.Conexao;
 import entidades.Biotipo;
 import entidades.Cliente;
 import entidades.Email;
-import utils.Container;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 public class ClienteDAO {
-
     private Conexao conexao;
+    private BiotipoDAO biotipoDAO;
+    private EmailDAO emailDAO;
 
-
-    EmailDAO emailDAO = Container.buscarDependencia(EmailDAO.class);
-    //BiotipoDAO biotipoDAO = Container.buscarDependencia(BiotipoDAO.class);
-
-    public ClienteDAO(Conexao conexao) {
+    public ClienteDAO(Conexao conexao, EmailDAO emailDAO) {
         this.conexao = conexao;
+        this.emailDAO = emailDAO;
+    }
+
+    public ClienteDAO() {
     }
 
     private Statement iniciarConexao() {
@@ -36,22 +37,43 @@ public class ClienteDAO {
     }
 
     public List<Cliente> buscarClientes() {
-
         try {
-
             String query = getQueryBuscarEstudantes();
-
 
             Statement estado = this.iniciarConexao();
             ResultSet resultSet = estado.executeQuery(query);
             return this.construirClientes(resultSet);
-
         } catch (SQLException ex) {
             System.out.println("Deu ruim enquando estava convertendo clientes");
             throw new RuntimeException(ex.getMessage());
         } finally {
             conexao.fechar();
         }
+    }
+
+    public Integer buscarUltimoIdCliente() {
+        try {
+           return this.buscarUltimoIdCliente(this.conexao.abrir().createStatement());
+        } catch (SQLException ex) {
+            System.out.println("Nada encontrado");
+            throw new RuntimeException(ex.getMessage());
+        }
+    }
+    public Integer buscarUltimoIdCliente(Statement estado) {
+        try {
+            String query = buscarUltimo();
+            ResultSet resultSet = estado.executeQuery(query);
+            resultSet.next();
+            Integer id = resultSet.getInt("id");
+            return id;
+        }catch (SQLException e){
+            System.out.println("Nada encontrado");
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    private String buscarUltimo() {
+        return "SELECT cliente.id FROM cliente ORDER BY id DESC LIMIT 1;";
     }
 
     private String getQueryBuscarEstudantes() {
@@ -74,8 +96,6 @@ public class ClienteDAO {
     private List<Cliente> construirClientes(ResultSet resultSet) throws SQLException {
 
         List<Cliente> clientes = new ArrayList<>();
-
-
         while (resultSet.next()) {
             //ResultSet olhando o proximo e recebe id
             Integer id = resultSet.getInt("cliente_id");
@@ -85,7 +105,7 @@ public class ClienteDAO {
             if (!existeClienteLista(id, clientes)) {
                 String nome = resultSet.getString("nome");
                 String cpf = resultSet.getString("cpf");
-                Date dataNascimento = resultSet.getDate("nascimento", Calendar.getInstance());
+                LocalDate dataNascimento = resultSet.getDate("nascimento", Calendar.getInstance()).toLocalDate();
                 cliente = new Cliente(id, nome, cpf, dataNascimento);
                 clientes.add(cliente);
             } else {
@@ -122,7 +142,6 @@ public class ClienteDAO {
                 cliente.addEmail(email);
             }
         }
-
         return clientes;
     }
 
@@ -147,9 +166,51 @@ public class ClienteDAO {
                 .stream()
                 .map(Cliente::getId)
                 .anyMatch(idClinte -> idClinte.equals(id));
-
         ;
-
         return existe;
+    }
+
+    public void inserir(Cliente novoCliente) {
+
+        try {
+            PreparedStatement query = conexao.abrir().prepareStatement("insert into cliente values (default,?,?,?);");
+
+            query.setString(1, novoCliente.getNome());
+            query.setString(2, novoCliente.getCpf());
+            query.setDate(3, java.sql.Date.valueOf(novoCliente.getDataNascimento()));
+
+            query.executeUpdate();
+
+            Integer id = buscarUltimoIdCliente(conexao.abrir().createStatement());
+            novoCliente.setId(id);
+            /*
+            // inserir biotipo
+            b.setIdCliente(id);
+            biotipoDAO.novoBiotipo(b);
+
+            // inserir email
+            e.setIdCliente(id);
+            emailDAO.novoEmail(e);
+            */
+
+        } catch (SQLException e) {
+            System.out.println("Dev tivemos problemas em conexão ao MySql");
+            e.printStackTrace();
+        }
+    }
+
+    public void atualizarCliente(Cliente cliente) {
+        try {
+            PreparedStatement query = conexao.abrir().prepareStatement("update cliente " +
+                    "set nome = ?,cpf =?, nascimento=? " +
+                    "where ?");
+            query.setString(1, cliente.getNome());
+            query.setString(2, cliente.getCpf());
+            query.setDate(3, java.sql.Date.valueOf(cliente.getDataNascimento()));
+            query.setInt(4, cliente.getId());
+        } catch (SQLException e) {
+            System.out.println("DEV tivemos problemas no update");
+            e.printStackTrace();
+        }
     }
 }

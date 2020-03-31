@@ -13,6 +13,10 @@ public class EmailControlador {
         this.emailDAO = emailDAO;
     }
 
+    public void criar(Email novoEmail){
+        emailDAO.novoEmail(novoEmail);
+    }
+
     public List<Email> buscarTodosEmails(){
         return emailDAO.buscarEmail();
     }

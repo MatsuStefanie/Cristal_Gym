@@ -14,6 +14,9 @@ public class Email {
         this.idCliente = idCliente;
     }
 
+    public Email() {
+    }
+
     public Integer getId() {
         return id;
     }
@@ -31,11 +34,28 @@ public class Email {
         }
     }
 
+
     public Integer getIdCliente() {
         return idCliente;
     }
     public Boolean getIsPrincipal(){
         return isPrincipal;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPrincipal(Boolean principal) {
+        isPrincipal = principal;
+    }
+
+    public void setIdCliente(Integer idCliente) {
+        this.idCliente = idCliente;
     }
 
     @Override
