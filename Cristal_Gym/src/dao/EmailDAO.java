@@ -71,10 +71,9 @@ public class EmailDAO {
         }
     }
 
-    public List<Email> buscarEmailDeClienteExpecifico(Cliente cliente) {
+    public List<Email> buscarEmailDeClienteEspecifico(Integer idCliente) {
         try {
-            String query = "Select email.* from email inner join cliente c on email.idCliente = c.id where idCliente =?";
-            query.substring(1, cliente.getId());
+            String query = "Select email.* from email inner join cliente c on email.idCliente = c.id where email.idCliente = ".concat(idCliente.toString());
             Statement estado = this.iniciarConexao();
             ResultSet resultSet = estado.executeQuery(query);
             return this.visualizarEmail(resultSet);
@@ -84,7 +83,42 @@ public class EmailDAO {
         }
     }
 
-    public void atualizarEmail(){
+    public void atualizarEmail(Email atualizarEmail) {
+        try {
+            PreparedStatement query = conexao.abrir().prepareStatement("update email " +
+                    "set email = ?,principal =?, idCliente=? where id = ?;");
+            query.setString(1, atualizarEmail.getEmail());
+            query.setBoolean(2, atualizarEmail.getIsPrincipal());
+            query.setInt(3, atualizarEmail.getIdCliente());
+            query.setInt(4, atualizarEmail.getId());
+            query.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("DEV tivemos problemas no update");
+            e.printStackTrace();
+        }
+    }
 
+    public void deletarEmailDe(Integer idCliente){
+        try{
+            PreparedStatement query = conexao.abrir().prepareStatement("delete from email where email.idCliente = ?;");
+            query.setInt(1,idCliente);
+            query.executeUpdate();
+        }catch (SQLException e){
+            System.out.println("+----------------------------------Email não excluido----------------------------------+");
+            e.printStackTrace();
+        }
+    }
+
+    public void deletarEmail(Email email) {
+        try {
+            PreparedStatement query = conexao.abrir().prepareStatement
+                    ("delete from email where email.idCliente = ? and email.id = ?;");
+            query.setInt(1, email.getIdCliente());
+            query.setInt(2, email.getId());
+            query.executeUpdate();
+        } catch (SQLException ex) {
+            System.out.println("DEV tivemos problemas ao excluir");
+            ex.printStackTrace();
+        }
     }
 }

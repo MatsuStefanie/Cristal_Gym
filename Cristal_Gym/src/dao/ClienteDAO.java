@@ -38,7 +38,7 @@ public class ClienteDAO {
 
     public List<Cliente> buscarClientes() {
         try {
-            String query = getQueryBuscarEstudantes();
+            String query = getQueryBuscarCliente();
 
             Statement estado = this.iniciarConexao();
             ResultSet resultSet = estado.executeQuery(query);
@@ -46,19 +46,18 @@ public class ClienteDAO {
         } catch (SQLException ex) {
             System.out.println("Deu ruim enquando estava convertendo clientes");
             throw new RuntimeException(ex.getMessage());
-        } finally {
-            conexao.fechar();
         }
     }
 
     public Integer buscarUltimoIdCliente() {
         try {
-           return this.buscarUltimoIdCliente(this.conexao.abrir().createStatement());
+            return this.buscarUltimoIdCliente(this.conexao.abrir().createStatement());
         } catch (SQLException ex) {
             System.out.println("Nada encontrado");
             throw new RuntimeException(ex.getMessage());
         }
     }
+
     public Integer buscarUltimoIdCliente(Statement estado) {
         try {
             String query = buscarUltimo();
@@ -66,17 +65,47 @@ public class ClienteDAO {
             resultSet.next();
             Integer id = resultSet.getInt("id");
             return id;
-        }catch (SQLException e){
+        } catch (SQLException e) {
             System.out.println("Nada encontrado");
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    public Cliente buscarClienteEspecifico(Integer idCliente) {
+        try {
+            return buscarClienteEspecifico(idCliente, this.conexao.abrir().createStatement());
+        }catch (SQLException ex){
+            System.out.println("Nada encontrado");
+            throw new RuntimeException(ex.getMessage());
+        }
+    }
+
+    public Cliente buscarClienteEspecifico(Integer idCliente, Statement estado){
+        try {
+            Cliente cliente = new Cliente();
+            String query = buscarCliente(idCliente);
+            ResultSet resultSet = estado.executeQuery(query);
+            resultSet.next();
+            cliente.setId(resultSet.getInt("id"));
+            cliente.setNome(resultSet.getString("nome"));
+            cliente.setCpf(resultSet.getString("cpf"));
+            cliente.setDataNascimento(resultSet.getDate("nascimento", Calendar.getInstance()).toLocalDate());
+            return cliente;
+        } catch (SQLException e) {
+            System.out.println("Nada encontrado");
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public String buscarCliente(Integer idCliente){
+        return "Select * from cliente where cliente.id ="+idCliente;
     }
 
     private String buscarUltimo() {
         return "SELECT cliente.id FROM cliente ORDER BY id DESC LIMIT 1;";
     }
 
-    private String getQueryBuscarEstudantes() {
+    private String getQueryBuscarCliente() {
         return "select cliente.id cliente_id,\n" +
                 "       nome,\n" +
                 "       cpf,\n" +
@@ -202,15 +231,27 @@ public class ClienteDAO {
     public void atualizarCliente(Cliente cliente) {
         try {
             PreparedStatement query = conexao.abrir().prepareStatement("update cliente " +
-                    "set nome = ?,cpf =?, nascimento=? " +
-                    "where ?");
+                    "set nome = ? , cpf = ? , nascimento = ? " +
+                    "where id = ? ");
             query.setString(1, cliente.getNome());
             query.setString(2, cliente.getCpf());
             query.setDate(3, java.sql.Date.valueOf(cliente.getDataNascimento()));
             query.setInt(4, cliente.getId());
+            query.executeUpdate();
         } catch (SQLException e) {
             System.out.println("DEV tivemos problemas no update");
             e.printStackTrace();
+        }
+    }
+
+    public void excluirTudoDe(Integer idCliente){
+        try{
+           PreparedStatement query = conexao.abrir().prepareStatement("DELETE FROM cliente " +
+                    "where id = ? ");
+            query.setInt(1,idCliente);
+            query.executeUpdate();
+        }catch (SQLException ex){
+            ex.printStackTrace();
         }
     }
 }

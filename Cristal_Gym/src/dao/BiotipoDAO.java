@@ -68,4 +68,16 @@ public class BiotipoDAO {
             e.printStackTrace();
         }
     }
+
+    public void excluirBiotipoDe(Integer idCliente){
+        try{
+            PreparedStatement query = conexao.abrir().prepareStatement("delete from biotipo where biotipo.idCliente = ? ;");
+            query.setInt(1,idCliente);
+            query.executeUpdate();
+        }catch (SQLException e){
+            System.out.println("+-------------------------------Biotipo não foi excluido-------------------------------+");
+            e.printStackTrace();
+        }
+
+    }
 }

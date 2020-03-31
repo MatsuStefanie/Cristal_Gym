@@ -47,7 +47,7 @@ public final class Container {
 
 
         ClienteDAO clienteDAO = new ClienteDAO(conexao, emailDAO);
-        ClienteControlador clienteControlador = new ClienteControlador(clienteDAO);
+        ClienteControlador clienteControlador = new ClienteControlador(clienteDAO, emailDAO, biotipoDAO);
         ClienteVisualizador clienteVisualizador = new ClienteVisualizador();
         TelaCliente telaCliente = new TelaCliente(clienteControlador,emailControlador,biotipoControlador);
 
